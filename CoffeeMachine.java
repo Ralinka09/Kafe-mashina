@@ -3,11 +3,11 @@ import java.util.Scanner;
 public class CoffeeMachine {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        boolean поръчвайОще = true;
+        boolean orderMore = true;
 
         System.out.println("Добре дошли в кафе машината!");
 
-        while (поръчвайОще) {
+        while (orderMore) {
 
             // ---- Меню ----
             System.out.println("\nМеню:");
@@ -16,100 +16,118 @@ public class CoffeeMachine {
             System.out.println("3. Капучино - 2.50 лв.");
 
             // ---- Избор на напитка ----
-            String напитка = "";
-            double цена = 0;
-            boolean валиденИзбор = false;
+            String drink = "";
+            double price = 0;
+            boolean validChoice = false;
 
-            while (!валиденИзбор) {
+            while (!validChoice) {
                 System.out.print("Изберете напитка (еспресо/лате/капучино): ");
-                напитка = scanner.nextLine().toLowerCase();
+                drink = scanner.nextLine().toLowerCase();
 
-                if (напитка.equals("еспресо")) {
-                    цена = 1.50;
-                    валиденИзбор = true;
-                } else if (напитка.equals("лате")) {
-                    цена = 2.00;
-                    валиденИзбор = true;
-                } else if (напитка.equals("капучино")) {
-                    цена = 2.50;
-                    валиденИзбор = true;
-                } else {
-                    System.out.println("Невалиден избор! Опитайте отново.");
+                switch (drink) {
+                    case "еспресо":
+                        price = 1.50;
+                        validChoice = true;
+                        break;
+                    case "лате":
+                        price = 2.00;
+                        validChoice = true;
+                        break;
+                    case "капучино":
+                        price = 2.50;
+                        validChoice = true;
+                        break;
+                    default:
+                        System.out.println("Невалиден избор! Опитайте отново.");
                 }
             }
 
             // ---- Брой напитки ----
             System.out.print("Колко броя желаете?: ");
-            int брой = scanner.nextInt();
-            scanner.nextLine(); // изчистване на реда
+            int quantity = Integer.parseInt(scanner.nextLine());
 
-            double общо = 0;
+            double total = 0;
 
-            // ---- За всяка напитка отделно ----
-            for (int i = 1; i <= брой; i++) {
+            // ---- За всяка напитка ----
+            for (int i = 1; i <= quantity; i++) {
                 System.out.printf("%nПоръчка #%d:%n", i);
-                double ценаЕкстри = 0;
-                String добавки = "";
+                double extrasPrice = 0;
+                String extrasList = "";
 
                 System.out.println("Екстри (по избор): захар (+0.10), мляко (+0.20), сметана (+0.30), канела (+0.15)");
                 System.out.print("Желаете ли екстри за тази напитка? (да/не): ");
-                String екстриОтговор = scanner.nextLine().toLowerCase();
+                String extrasAnswer = scanner.nextLine().toLowerCase();
 
-                if (екстриОтговор.equals("да")) {
+                if (extrasAnswer.equals("да")) {
                     System.out.print("Въведете екстрите (пример: захар, мляко): ");
-                    String въведениЕкстри = scanner.nextLine().toLowerCase();
+                    String enteredExtras = scanner.nextLine().toLowerCase();
 
-                    if (въведениЕкстри.contains("захар")) {
-                        ценаЕкстри += 0.10;
-                        добавки += "захар ";
+                    if (enteredExtras.contains("захар")) {
+                        extrasPrice += 0.10;
+                        extrasList += "захар ";
                     }
-                    if (въведениЕкстри.contains("мляко")) {
-                        ценаЕкстри += 0.20;
-                        добавки += "мляко ";
+                    if (enteredExtras.contains("мляко")) {
+                        extrasPrice += 0.20;
+                        extrasList += "мляко ";
                     }
-                    if (въведениЕкстри.contains("сметана")) {
-                        ценаЕкстри += 0.30;
-                        добавки += "сметана ";
+                    if (enteredExtras.contains("сметана")) {
+                        extrasPrice += 0.30;
+                        extrasList += "сметана ";
                     }
-                    if (въведениЕкстри.contains("канела")) {
-                        ценаЕкстри += 0.15;
-                        добавки += "канела ";
+                    if (enteredExtras.contains("канела")) {
+                        extrasPrice += 0.15;
+                        extrasList += "канела ";
                     }
                 }
 
-                double ценаНапитка = цена + ценаЕкстри;
-                общо += ценаНапитка;
+                double drinkPrice = price + extrasPrice;
+                total += drinkPrice;
 
                 System.out.printf("Цена за напитка #%d: %.2f лв. (%s)%n",
-                        i, ценаНапитка, добавки.isEmpty() ? "без екстри" : добавки);
+                        i, drinkPrice, extrasList.isEmpty() ? "без екстри" : extrasList);
             }
 
             // ---- Общо плащане ----
             System.out.printf("%nОбща цена за %d %s: %.2f лв.%n",
-                    брой, capitalize(напитка), общо);
+                    quantity, capitalize(drink), total);
 
             System.out.print("Въведете сумата, която плащате: ");
-            double пари = scanner.nextDouble();
-            scanner.nextLine();
+            double money = parseInput(scanner);
 
-            if (пари < общо) {
-                System.out.printf("Недостатъчно пари! Трябват още %.2f лв.%n", общо - пари);
-            } else if (пари == общо) {
+            while (money < total) {
+                System.out.printf("Недостатъчно пари! Трябват още %.2f лв.%n", total - money);
+                System.out.print("Въведи допълнителните пари: ");
+                money += parseInput(scanner);
+            }
+
+            if (Math.abs(money - total) < 0.001) {
                 System.out.println("Благодаря! Пригответе си вашето кафе ☕");
             } else {
-                System.out.printf("Благодаря! Вашето ресто е %.2f лв.%n", пари - общо);
+                System.out.printf("Благодаря! Вашето ресто е %.2f лв.%n", money - total);
             }
 
             // ---- Нова поръчка ----
             System.out.print("\nЖелаете ли да поръчате още? (да/не): ");
-            String отговор = scanner.nextLine().toLowerCase();
-            if (!отговор.equals("да")) {
-                поръчвайОще = false;
+            String answer = scanner.nextLine().toLowerCase();
+
+            if (!answer.equals("да")) {
+                orderMore = false;
                 System.out.println("Благодарим, че използвахте кафе машината! ☕");
             }
         }
 
         scanner.close();
+    }
+
+    // Метод за автоматично приемане на запетая или точка
+    static double parseInput(Scanner scanner) {
+        String input = scanner.nextLine().replace(",", ".").trim();
+        try {
+            return Double.parseDouble(input);
+        } catch (NumberFormatException e) {
+            System.out.println("Невалидно число! Опитайте отново:");
+            return parseInput(scanner); // рекурсивно повтаря, докато не се въведе валидно число
+        }
     }
 
     static String capitalize(String text) {
